@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Your Availability</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #111; font-size: 22px; text-align: center; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #333; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #0066cc; outline: none; }
+        button { background: #0066cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #0051a8; }
+        .hidden { display: none; }
+        .success-msg { background: #e6f4ea; color: #137333; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Schedule Your Availability</h2>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" required placeholder="Enter your phone number">
+        </div>
+
+        <div class="form-group">
+            <label for="date">Select Date</label>
+            <input type="date" id="date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="slot">Available Slot (10 AM - 9 PM)</label>
+            <select id="slot" required>
+                <option value="">Select standard slot</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="11:00 AM">11:00 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="01:00 PM">01:00 PM</option>
+                <option value="02:00 PM">02:00 PM</option>
+                <option value="03:00 PM">03:00 PM</option>
+                <option value="04:00 PM">04:00 PM</option>
+                <option value="05:00 PM">05:00 PM</option>
+                <option value="06:00 PM">06:00 PM</option>
+                <option value="07:00 PM">07:00 PM</option>
+                <option value="08:00 PM">08:00 PM</option>
+                <option value="09:00 PM">09:00 PM</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="preference">Preference</label>
+            <select id="preference" required>
+                <option value="standard">Available between standard hours (10 AM - 9 PM)</option>
+                <option value="custom">Not above / Other preferred time</option>
+            </select>
+        </div>
+
+        <div class="form-group hidden" id="customTimeGroup">
+            <label for="customTime">Mention Preferred Time</label>
+            <input type="text" id="customTime" placeholder="e.g., 9:30 PM or Tomorrow 8 AM">
+        </div>
+
+        <button type="submit" id="submitBtn">Confirm Booking</button>
+    </form>
+    <div id="successMessage" class="success-msg hidden">Booking confirmed and saved live!</div>
+</div>
+
+<script>
+    const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+
+    const preferenceSelect = document.getElementById('preference');
+    const customTimeGroup = document.getElementById('customTimeGroup');
+    const customTimeInput = document.getElementById('customTime');
+
+    preferenceSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customTimeGroup.classList.remove('hidden');
+            customTimeInput.required = true;
+        } else {
+            customTimeGroup.classList.add('hidden');
+            customTimeInput.required = false;
+        }
+    });
+
+    document.getElementById('bookingForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const data = {
+            phone: document.getElementById('phone').value,
+            date: document.getElementById('date').value,
+            slot: document.getElementById('slot').value,
+            preference: preferenceSelect.value,
+            customTime: customTimeInput.value
+        };
+
+        fetch(scriptURL, { method: 'POST', body: JSON.stringify(data), mode: 'no-cors' })
+            .then(() => {
+                document.getElementById('bookingForm').style.display = 'none';
+                document.getElementById('successMessage').classList.remove('hidden');
+            })
+            .catch(error => {
+                alert('Error! Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Confirm Booking';
+            });
+    });
+</script>
+
+</body>
+</html>
